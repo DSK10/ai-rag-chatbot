@@ -4,7 +4,7 @@ services:
     container_name: ai-rag-postgres
     environment:
       POSTGRES_USER: raguser
-      POSTGRES_PASSWORD: ragpass
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ragdb
     ports: ["127.0.0.1:${POSTGRES_PORT:-5432}:5432"]
     volumes:
@@ -23,14 +23,20 @@ services:
     restart: unless-stopped
 
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.31.1
     container_name: ai-rag-ollama
     ports: ["127.0.0.1:${OLLAMA_PORT:-11434}:11434"]
     volumes:
       - ollama_data:/root/.ollama
     restart: unless-stopped
-    
-  
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
   ollama-init:
     image: ollama/ollama:0.31.1
     depends_on:
@@ -46,14 +52,14 @@ services:
     container_name: ai-rag-app
     ports: ["127.0.0.1:${APP_PORT:-8000}:8000"]
     environment:
-      DATABASE_URL: postgresql://raguser:ragpass@postgres:5432/ragdb
+      DATABASE_URL: postgresql://raguser:${POSTGRES_PASSWORD}@postgres:5432/ragdb
       OLLAMA_HOST: http://ollama:11434
       OLLAMA_MODEL: llama3.2
     depends_on:
       postgres:
         condition: service_healthy
-      ollama:
-        condition: service_started
+      ollama-init:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://localhost:8000/health')"]
       interval: 15s
