@@ -4,9 +4,11 @@ from app.services.ollama_client import get_chat_reply, OllamaUnavailableError
 from app.services.db import save_message
 import uuid
 import logging
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):

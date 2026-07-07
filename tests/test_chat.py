@@ -4,6 +4,7 @@ from app.main import app
 
 client = TestClient(app)
 
+
 @patch("app.routers.chat.save_message", new_callable=AsyncMock)
 @patch("app.routers.chat.get_chat_reply", new_callable=AsyncMock)
 def test_chat_endpoint(mock_get_reply, mock_save_message):

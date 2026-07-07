@@ -3,6 +3,7 @@ from app.config import settings
 
 _client = AsyncClient(host=settings.ollama_host)
 
+
 class OllamaUnavailableError(Exception):
     """Raised when ollama model is not reachable"""
 
@@ -10,10 +11,7 @@ class OllamaUnavailableError(Exception):
 async def get_chat_reply(text: str) -> str:
     try:
         result = await _client.chat(
-            model=settings.ollama_model,
-            messages=[
-                {"role": "user", "content": text}
-            ]
+            model=settings.ollama_model, messages=[{"role": "user", "content": text}]
         )
     except ResponseError as e:
         raise OllamaUnavailableError(f"Response error from ollama {e}") from e
@@ -28,6 +26,7 @@ async def check_ollama() -> bool:
         return True
     except Exception:
         return False
+
 
 async def close_ollama_client():
     close = getattr(_client, "aclose", None)
