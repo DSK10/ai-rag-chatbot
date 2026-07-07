@@ -26,8 +26,10 @@ async def main():
 
     times = sorted(t for t, _ in results)
     errors = sum(1 for _, c in results if c != 200)
-    def pct(p:float):
+
+    def pct(p: float):
         return times[max(int(len(times) * p) - 1, 0)]
+
     # pct = lambda p: times[max(int(len(times) * p) - 1, 0)]
     print(f"requests={len(times)} errors={errors}")
     print(
